@@ -12,7 +12,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ *//*
+
 package com.example.android.uamp.ui.tv;
 
 import android.app.Activity;
@@ -43,6 +44,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
+*/
 /**
  * Browse media categories and current playing queue.
  * <p/>
@@ -66,7 +68,8 @@ import java.util.List;
  * <p/>
  * This fragment also shows the MediaSession queue ("now playing" list), in case there is
  * something playing.
- */
+ *//*
+
 public class TvBrowseFragment extends BrowseFragment {
 
     private static final String TAG = LogHelper.makeLogTag(TvBrowseFragment.class);
@@ -183,9 +186,11 @@ public class TvBrowseFragment extends BrowseFragment {
                 }
             };
 
-    /**
+    */
+/**
      * This callback fills content for a single Row in the BrowseFragment.
-     */
+     *//*
+
     private class RowSubscriptionCallback extends MediaBrowser.SubscriptionCallback {
 
         private final ArrayObjectAdapter mListRowAdapter;
@@ -331,3 +336,4 @@ public class TvBrowseFragment extends BrowseFragment {
 
 }
 
+*/

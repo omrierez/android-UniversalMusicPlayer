@@ -12,7 +12,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ *//*
+
 package com.example.android.uamp.ui.tv;
 
 import android.app.Activity;
@@ -28,10 +29,12 @@ import com.example.android.uamp.MusicService;
 import com.example.android.uamp.R;
 import com.example.android.uamp.utils.LogHelper;
 
+*/
 /**
  * Activity used to display details of the currently playing song, along with playback controls
  * and the playing queue.
- */
+ *//*
+
 public class TvPlaybackActivity extends Activity {
     private static final String TAG = LogHelper.makeLogTag(TvPlaybackActivity.class);
 
@@ -101,10 +104,12 @@ public class TvPlaybackActivity extends Activity {
                 }
             };
 
-    /**
+    */
+/**
      * Receive callbacks from the MediaController. Here we update our state such as which queue
      * is being shown, the current title and description and the PlaybackState.
-     */
+     *//*
+
     private final MediaController.Callback mMediaControllerCallback = new MediaController.Callback() {
         @Override
         public void onPlaybackStateChanged(@NonNull PlaybackState state) {
@@ -125,3 +130,4 @@ public class TvPlaybackActivity extends Activity {
         }
     };
 }
+*/

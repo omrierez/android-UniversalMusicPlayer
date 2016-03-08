@@ -12,7 +12,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ *//*
+
 package com.example.android.uamp.ui.tv;
 
 import android.graphics.Bitmap;
@@ -53,9 +54,11 @@ import com.example.android.uamp.utils.LogHelper;
 
 import java.util.List;
 
+*/
 /*
  * Show details of the currently playing song, along with playback controls and the playing queue.
- */
+ *//*
+
 public class TvPlaybackFragment extends android.support.v17.leanback.app.PlaybackOverlayFragment {
     private static final String TAG = LogHelper.makeLogTag(TvPlaybackFragment.class);
 
@@ -351,3 +354,4 @@ public class TvPlaybackFragment extends android.support.v17.leanback.app.Playbac
         }
     }
 }
+*/

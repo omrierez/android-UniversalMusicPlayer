@@ -53,7 +53,7 @@
         <item name="colorPrimaryDark">#ffbf360c</item>
     </style>
 
-
+<!--
     <style name="Theme.UAmp.TVLeanback" parent="Theme.Leanback">
         <item name="android:windowEnterTransition">@android:transition/fade</item>
         <item name="android:windowExitTransition">@android:transition/fade</item>
@@ -65,5 +65,5 @@
         <item name="android:colorPrimary">@color/tv_branding_dark</item>
         <item name="android:colorPrimaryDark">@color/tv_branding_dark</item>
         <item name="android:colorAccent">@color/tv_branding_accent</item>
-    </style>
+    </style>-->
 </resources>

@@ -12,7 +12,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ *//*
+
 package com.example.android.uamp.ui.tv;
 
 import android.app.Activity;
@@ -35,9 +36,12 @@ import com.example.android.uamp.utils.LogHelper;
 
 import java.util.List;
 
+*/
 /*
  * VerticalGridFragment shows a grid of music songs
- */
+ *//*
+
+
 public class TvVerticalGridFragment extends android.support.v17.leanback.app.VerticalGridFragment {
     private static final String TAG = LogHelper.makeLogTag(TvVerticalGridFragment.class);
 
@@ -148,3 +152,4 @@ public class TvVerticalGridFragment extends android.support.v17.leanback.app.Ver
         }
     };
 }
+*/

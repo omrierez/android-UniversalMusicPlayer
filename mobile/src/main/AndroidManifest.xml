@@ -77,7 +77,7 @@
         </activity>
 
         <!-- Main activity for Android TV user interface -->
-        <activity
+       <!-- <activity
             android:name=".ui.tv.TvBrowseActivity"
             android:label="@string/app_name"
             android:theme="@style/Theme.UAmp.TVLeanback" >
@@ -92,12 +92,12 @@
             android:theme="@style/Theme.UAmp.TVLeanback"
             android:parentActivityName=".ui.tv.TvBrowseActivity" />
 
-        <!-- Android TV UI when playing a song -->
+        &lt;!&ndash; Android TV UI when playing a song &ndash;&gt;
         <activity
             android:name=".ui.tv.TvPlaybackActivity"
             android:theme="@style/Theme.UAmp.TVLeanback"
             android:parentActivityName=".ui.tv.TvBrowseActivity" />
-
+-->
         <!--
              (OPTIONAL) use this meta data to indicate which icon should be
              used in Android Auto media notifications (for example, when the

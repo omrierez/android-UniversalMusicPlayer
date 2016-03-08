@@ -12,7 +12,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ *//*
+
 package com.example.android.uamp.ui.tv;
 
 import android.content.Context;
@@ -135,10 +136,12 @@ public class CardPresenter extends Presenter {
         }
     }
 
-    /**
+    */
+/**
      * Simple drawable that draws a text (letter, in this case). Used with the media title when
      * the MediaDescription has no corresponding album art.
-     */
+     *//*
+
     private static class TextDrawable extends Drawable {
 
         private final String text;
@@ -185,3 +188,4 @@ public class CardPresenter extends Presenter {
 }
 
 
+*/

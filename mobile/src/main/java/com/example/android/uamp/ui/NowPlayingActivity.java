@@ -16,12 +16,8 @@
 package com.example.android.uamp.ui;
 
 import android.app.Activity;
-import android.app.UiModeManager;
-import android.content.Intent;
-import android.content.res.Configuration;
 import android.os.Bundle;
 
-import com.example.android.uamp.ui.tv.TvPlaybackActivity;
 import com.example.android.uamp.utils.LogHelper;
 
 /**
@@ -37,7 +33,7 @@ public class NowPlayingActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        LogHelper.d(TAG, "onCreate");
+     /*   LogHelper.d(TAG, "onCreate");
         Intent newIntent;
         UiModeManager uiModeManager = (UiModeManager) getSystemService(UI_MODE_SERVICE);
         if (uiModeManager.getCurrentModeType() == Configuration.UI_MODE_TYPE_TELEVISION) {
@@ -48,6 +44,6 @@ public class NowPlayingActivity extends Activity {
             newIntent = new Intent(this, MusicPlayerActivity.class);
         }
         startActivity(newIntent);
-        finish();
+        finish();*/
     }
 }
