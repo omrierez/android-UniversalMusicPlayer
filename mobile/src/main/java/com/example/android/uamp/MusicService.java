@@ -21,7 +21,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.media.session.PlaybackState;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -369,7 +368,7 @@ public class MusicService extends MediaBrowserServiceCompat implements
     }
 
     @Override
-    public void onPlaybackStateUpdated(PlaybackState newState) {
+    public void onPlaybackStateUpdated(PlaybackStateCompat newState) {
         mSession.setPlaybackState(PlaybackStateCompat.fromPlaybackState(newState));
 
     }

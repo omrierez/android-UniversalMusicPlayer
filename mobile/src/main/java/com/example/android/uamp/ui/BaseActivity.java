@@ -16,7 +16,6 @@
 package com.example.android.uamp.ui;
 
 import android.content.ComponentName;
-import android.media.session.PlaybackState;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.support.v4.media.MediaBrowserCompat;
@@ -128,9 +127,9 @@ public abstract class BaseActivity extends ActionBarCastActivity implements Medi
             return false;
         }
         switch (mediaController.getPlaybackState().getState()) {
-            case PlaybackState.STATE_ERROR:
-            case PlaybackState.STATE_NONE:
-            case PlaybackState.STATE_STOPPED:
+            case PlaybackStateCompat.STATE_ERROR:
+            case PlaybackStateCompat.STATE_NONE:
+            case PlaybackStateCompat.STATE_STOPPED:
                 return false;
             default:
                 return true;
@@ -170,6 +169,8 @@ public abstract class BaseActivity extends ActionBarCastActivity implements Medi
                 @Override
                 public void onPlaybackStateChanged(PlaybackStateCompat state) {
                     super.onPlaybackStateChanged(state);
+                    if (state == null)
+                        return;
                     if (shouldShowControls()) {
                         showPlaybackControls();
                     } else {
