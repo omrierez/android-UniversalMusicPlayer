@@ -18,13 +18,13 @@ package com.example.android.uamp.ui;
 import android.app.Fragment;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.media.session.PlaybackState;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
+import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -91,8 +91,8 @@ public class PlaybackControlsFragment extends Fragment {
             public void onClick(View v) {
                 Intent intent = new Intent(getActivity(), FullScreenPlayerActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                MediaControllerCompat controller = ((FragmentActivity) getActivity())
-                        .getSupportMediaController();
+                MediaControllerCompat controller = ((AppCompatActivity)getActivity()).getSupportMediaController();
+
                 MediaMetadataCompat metadata = controller.getMetadata();
                 if (metadata != null) {
                     intent.putExtra(MusicPlayerActivity.EXTRA_CURRENT_MEDIA_DESCRIPTION,
@@ -108,9 +108,7 @@ public class PlaybackControlsFragment extends Fragment {
     public void onStart() {
         super.onStart();
         LogHelper.d(TAG, "fragment.onStart");
-        MediaControllerCompat controller = ((FragmentActivity) getActivity())
-                .getSupportMediaController();
-        if (controller != null) {
+        if ( ((AppCompatActivity)getActivity()).getSupportMediaController()!= null) {
             onConnected();
         }
     }
@@ -119,16 +117,15 @@ public class PlaybackControlsFragment extends Fragment {
     public void onStop() {
         super.onStop();
         LogHelper.d(TAG, "fragment.onStop");
-        MediaControllerCompat controller = ((FragmentActivity) getActivity())
-                .getSupportMediaController();
+        MediaControllerCompat controller = ((AppCompatActivity)getActivity()).getSupportMediaController();
+
         if (controller != null) {
             controller.unregisterCallback(mCallback);
         }
     }
 
     public void onConnected() {
-        MediaControllerCompat controller = ((FragmentActivity) getActivity())
-                .getSupportMediaController();
+        MediaControllerCompat controller = ((AppCompatActivity)getActivity()).getSupportMediaController();
         LogHelper.d(TAG, "onConnected, mediaController==null? ", controller == null);
         if (controller != null) {
             onMetadataChanged(controller.getMetadata());
@@ -202,11 +199,11 @@ public class PlaybackControlsFragment extends Fragment {
         }
         boolean enablePlay = false;
         switch (state.getState()) {
-            case PlaybackStateCompat.STATE_PAUSED:
-            case PlaybackStateCompat.STATE_STOPPED:
+            case PlaybackState.STATE_PAUSED:
+            case PlaybackState.STATE_STOPPED:
                 enablePlay = true;
                 break;
-            case PlaybackStateCompat.STATE_ERROR:
+            case PlaybackState.STATE_ERROR:
                 LogHelper.e(TAG, "error playbackstate: ", state.getErrorMessage());
                 Toast.makeText(getActivity(), state.getErrorMessage(), Toast.LENGTH_LONG).show();
                 break;
@@ -214,14 +211,12 @@ public class PlaybackControlsFragment extends Fragment {
 
         if (enablePlay) {
             mPlayPause.setImageDrawable(
-                    ContextCompat.getDrawable(getActivity(), R.drawable.ic_play_arrow_black_36dp));
+                    getResources().getDrawable(R.drawable.ic_play_arrow_black_36dp));
         } else {
-            mPlayPause.setImageDrawable(
-                    ContextCompat.getDrawable(getActivity(), R.drawable.ic_pause_black_36dp));
+            mPlayPause.setImageDrawable(getResources().getDrawable(R.drawable.ic_pause_black_36dp));
         }
+        MediaControllerCompat controller = ((AppCompatActivity)getActivity()).getSupportMediaController();
 
-        MediaControllerCompat controller = ((FragmentActivity) getActivity())
-                .getSupportMediaController();
         String extraInfo = null;
         if (controller != null && controller.getExtras() != null) {
             String castName = controller.getExtras().getString(MusicService.EXTRA_CONNECTED_CAST);
@@ -235,22 +230,22 @@ public class PlaybackControlsFragment extends Fragment {
     private final View.OnClickListener mButtonListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            MediaControllerCompat controller = ((FragmentActivity) getActivity())
-                    .getSupportMediaController();
+            MediaControllerCompat controller = ((AppCompatActivity)getActivity()).getSupportMediaController();
+
             PlaybackStateCompat stateObj = controller.getPlaybackState();
             final int state = stateObj == null ?
-                    PlaybackStateCompat.STATE_NONE : stateObj.getState();
+                    PlaybackState.STATE_NONE : stateObj.getState();
             LogHelper.d(TAG, "Button pressed, in state " + state);
             switch (v.getId()) {
                 case R.id.play_pause:
                     LogHelper.d(TAG, "Play button pressed, in state " + state);
-                    if (state == PlaybackStateCompat.STATE_PAUSED ||
-                            state == PlaybackStateCompat.STATE_STOPPED ||
-                            state == PlaybackStateCompat.STATE_NONE) {
+                    if (state == PlaybackState.STATE_PAUSED ||
+                            state == PlaybackState.STATE_STOPPED ||
+                            state == PlaybackState.STATE_NONE) {
                         playMedia();
-                    } else if (state == PlaybackStateCompat.STATE_PLAYING ||
-                            state == PlaybackStateCompat.STATE_BUFFERING ||
-                            state == PlaybackStateCompat.STATE_CONNECTING) {
+                    } else if (state == PlaybackState.STATE_PLAYING ||
+                            state == PlaybackState.STATE_BUFFERING ||
+                            state == PlaybackState.STATE_CONNECTING) {
                         pauseMedia();
                     }
                     break;
@@ -259,16 +254,14 @@ public class PlaybackControlsFragment extends Fragment {
     };
 
     private void playMedia() {
-        MediaControllerCompat controller = ((FragmentActivity) getActivity())
-                .getSupportMediaController();
+        MediaControllerCompat controller = ((AppCompatActivity)getActivity()).getSupportMediaController();
         if (controller != null) {
             controller.getTransportControls().play();
         }
     }
 
     private void pauseMedia() {
-        MediaControllerCompat controller = ((FragmentActivity) getActivity())
-                .getSupportMediaController();
+        MediaControllerCompat controller = ((AppCompatActivity)getActivity()).getSupportMediaController();
         if (controller != null) {
             controller.getTransportControls().pause();
         }

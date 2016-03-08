@@ -18,6 +18,8 @@ package com.example.android.uamp.model;
 
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.media.MediaMetadata;
+import android.media.session.MediaSession;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.v4.media.MediaBrowserCompat;
@@ -91,6 +93,8 @@ public class MusicProvider {
 
     /**
      * Get an iterator over a shuffled collection of all songs
+     *
+     * @return
      */
     public Iterable<MediaMetadataCompat> getShuffledMusic() {
         if (mCurrentState != State.INITIALIZED) {
@@ -159,7 +163,7 @@ public class MusicProvider {
 
 
     /**
-     * Return the MediaMetadataCompat for the given musicID.
+     * Return the MediaMetadata for the given musicID.
      *
      * @param musicId The unique, non-hierarchical music ID.
      */
@@ -201,6 +205,10 @@ public class MusicProvider {
 
     public boolean isFavorite(String musicId) {
         return mFavoriteTracks.contains(musicId);
+    }
+
+    public boolean isInitialized() {
+        return mCurrentState == State.INITIALIZED;
     }
 
     /**
@@ -257,7 +265,7 @@ public class MusicProvider {
                 Iterator<MediaMetadataCompat> tracks = mSource.iterator();
                 while (tracks.hasNext()) {
                     MediaMetadataCompat item = tracks.next();
-                    String musicId = item.getString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID);
+                    String musicId = item.getString(MediaMetadata.METADATA_KEY_MEDIA_ID);
                     mMusicListById.put(musicId, new MutableMediaMetadata(musicId, item));
                 }
                 buildListsByGenre();
@@ -308,8 +316,7 @@ public class MusicProvider {
                 .setIconUri(Uri.parse("android.resource://" +
                         "com.example.android.uamp/drawable/ic_by_genre"))
                 .build();
-        return new MediaBrowserCompat.MediaItem(description,
-                MediaBrowserCompat.MediaItem.FLAG_BROWSABLE);
+        return new MediaBrowserCompat.MediaItem(description, MediaBrowserCompat.MediaItem.FLAG_BROWSABLE);
     }
 
     private MediaBrowserCompat.MediaItem createBrowsableMediaItemForGenre(String genre,
@@ -320,8 +327,7 @@ public class MusicProvider {
                 .setSubtitle(resources.getString(
                         R.string.browse_musics_by_genre_subtitle, genre))
                 .build();
-        return new MediaBrowserCompat.MediaItem(description,
-                MediaBrowserCompat.MediaItem.FLAG_BROWSABLE);
+        return new MediaBrowserCompat.MediaItem(description, MediaBrowserCompat.MediaItem.FLAG_BROWSABLE);
     }
 
     private MediaBrowserCompat.MediaItem createMediaItem(MediaMetadataCompat metadata) {
@@ -335,6 +341,7 @@ public class MusicProvider {
         MediaMetadataCompat copy = new MediaMetadataCompat.Builder(metadata)
                 .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID, hierarchyAwareMediaID)
                 .build();
+
         return new MediaBrowserCompat.MediaItem(copy.getDescription(),
                 MediaBrowserCompat.MediaItem.FLAG_PLAYABLE);
 

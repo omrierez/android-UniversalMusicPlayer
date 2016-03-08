@@ -15,13 +15,10 @@
  */
 package com.example.android.uamp.ui;
 
-import android.app.ActivityManager;
 import android.content.ComponentName;
-import android.graphics.BitmapFactory;
-import android.os.Build;
+import android.media.session.PlaybackState;
 import android.os.Bundle;
 import android.os.RemoteException;
-import android.support.annotation.NonNull;
 import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaControllerCompat;
@@ -32,7 +29,6 @@ import com.example.android.uamp.MusicService;
 import com.example.android.uamp.R;
 import com.example.android.uamp.utils.LogHelper;
 import com.example.android.uamp.utils.NetworkHelper;
-import com.example.android.uamp.utils.ResourceHelper;
 
 /**
  * Base activity for activities that need to show a playback control fragment when media is playing.
@@ -50,22 +46,18 @@ public abstract class BaseActivity extends ActionBarCastActivity implements Medi
 
         LogHelper.d(TAG, "Activity onCreate");
 
-        if (Build.VERSION.SDK_INT >= 21) {
-            // Since our app icon has the same color as colorPrimary, our entry in the Recent Apps
-            // list gets weird. We need to change either the icon or the color
-            // of the TaskDescription.
-            ActivityManager.TaskDescription taskDesc = new ActivityManager.TaskDescription(
-                    getTitle().toString(),
-                    BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher_white),
-                    ResourceHelper.getThemeColor(this, R.attr.colorPrimary,
-                            android.R.color.darker_gray));
-            setTaskDescription(taskDesc);
-        }
+        // Since our app icon has the same color as colorPrimary, our entry in the Recent Apps
+        // list gets weird. We need to change either the icon or the color of the TaskDescription.
+      /*  ActivityManager.TaskDescription taskDesc = new ActivityManager.TaskDescription(
+                getTitle().toString(),
+                BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher_white),
+                ResourceHelper.getThemeColor(this, R.attr.colorPrimary, android.R.color.darker_gray));
+        setTaskDescription(taskDesc);*/
 
         // Connect a media browser just to get the media session token. There are other ways
         // this can be done, for example by sharing the session token directly.
         mMediaBrowser = new MediaBrowserCompat(this,
-            new ComponentName(this, MusicService.class), mConnectionCallback, null);
+                new ComponentName(this, MusicService.class), mConnectionCallback, null);
     }
 
     @Override
@@ -74,7 +66,7 @@ public abstract class BaseActivity extends ActionBarCastActivity implements Medi
         LogHelper.d(TAG, "Activity onStart");
 
         mControlsFragment = (PlaybackControlsFragment) getFragmentManager()
-            .findFragmentById(R.id.fragment_playback_controls);
+                .findFragmentById(R.id.fragment_playback_controls);
         if (mControlsFragment == null) {
             throw new IllegalStateException("Mising fragment with id 'controls'. Cannot continue.");
         }
@@ -107,19 +99,19 @@ public abstract class BaseActivity extends ActionBarCastActivity implements Medi
         LogHelper.d(TAG, "showPlaybackControls");
         if (NetworkHelper.isOnline(this)) {
             getFragmentManager().beginTransaction()
-                .setCustomAnimations(
-                    R.animator.slide_in_from_bottom, R.animator.slide_out_to_bottom,
-                    R.animator.slide_in_from_bottom, R.animator.slide_out_to_bottom)
-                .show(mControlsFragment)
-                .commit();
+                    .setCustomAnimations(
+                            R.animator.slide_in_from_bottom, R.animator.slide_out_to_bottom,
+                            R.animator.slide_in_from_bottom, R.animator.slide_out_to_bottom)
+                    .show(mControlsFragment)
+                    .commit();
         }
     }
 
     protected void hidePlaybackControls() {
         LogHelper.d(TAG, "hidePlaybackControls");
         getFragmentManager().beginTransaction()
-            .hide(mControlsFragment)
-            .commit();
+                .hide(mControlsFragment)
+                .commit();
     }
 
     /**
@@ -131,78 +123,84 @@ public abstract class BaseActivity extends ActionBarCastActivity implements Medi
     protected boolean shouldShowControls() {
         MediaControllerCompat mediaController = getSupportMediaController();
         if (mediaController == null ||
-            mediaController.getMetadata() == null ||
-            mediaController.getPlaybackState() == null) {
+                mediaController.getMetadata() == null ||
+                mediaController.getPlaybackState() == null) {
             return false;
         }
         switch (mediaController.getPlaybackState().getState()) {
-            case PlaybackStateCompat.STATE_ERROR:
-            case PlaybackStateCompat.STATE_NONE:
-            case PlaybackStateCompat.STATE_STOPPED:
+            case PlaybackState.STATE_ERROR:
+            case PlaybackState.STATE_NONE:
+            case PlaybackState.STATE_STOPPED:
                 return false;
             default:
                 return true;
         }
     }
 
-    private void connectToSession(MediaSessionCompat.Token token) throws RemoteException {
-        MediaControllerCompat mediaController = new MediaControllerCompat(this, token);
-        setSupportMediaController(mediaController);
-        mediaController.registerCallback(mMediaControllerCallback);
+    private void connectToSession(MediaSessionCompat.Token token) {
+        try {
+            MediaControllerCompat mediaController = new MediaControllerCompat(this, token);
 
-        if (shouldShowControls()) {
-            showPlaybackControls();
-        } else {
-            LogHelper.d(TAG, "connectionCallback.onConnected: " +
-                "hiding controls because metadata is null");
-            hidePlaybackControls();
+            setSupportMediaController(mediaController);
+            mediaController.registerCallback(mMediaControllerCallback);
+
+            if (shouldShowControls()) {
+                showPlaybackControls();
+            } else {
+                LogHelper.d(TAG, "connectionCallback.onConnected: " +
+                        "hiding controls because metadata is null");
+                hidePlaybackControls();
+            }
+
+            if (mControlsFragment != null) {
+                mControlsFragment.onConnected();
+            }
+
+            onMediaControllerConnected();
+        } catch (RemoteException e) {
+            LogHelper.e(TAG, e);
+            e.printStackTrace();
         }
-
-        if (mControlsFragment != null) {
-            mControlsFragment.onConnected();
-        }
-
-        onMediaControllerConnected();
     }
 
     // Callback that ensures that we are showing the controls
     private final MediaControllerCompat.Callback mMediaControllerCallback =
-        new MediaControllerCompat.Callback() {
-            @Override
-            public void onPlaybackStateChanged(@NonNull PlaybackStateCompat state) {
-                if (shouldShowControls()) {
-                    showPlaybackControls();
-                } else {
-                    LogHelper.d(TAG, "mediaControllerCallback.onPlaybackStateChanged: " +
-                            "hiding controls because state is ", state.getState());
-                    hidePlaybackControls();
-                }
-            }
+            new MediaControllerCompat.Callback() {
 
-            @Override
-            public void onMetadataChanged(MediaMetadataCompat metadata) {
-                if (shouldShowControls()) {
-                    showPlaybackControls();
-                } else {
-                    LogHelper.d(TAG, "mediaControllerCallback.onMetadataChanged: " +
-                        "hiding controls because metadata is null");
-                    hidePlaybackControls();
+                @Override
+                public void onPlaybackStateChanged(PlaybackStateCompat state) {
+                    super.onPlaybackStateChanged(state);
+                    if (shouldShowControls()) {
+                        showPlaybackControls();
+                    } else {
+                        LogHelper.d(TAG, "mediaControllerCallback.onPlaybackStateChanged: " +
+                                "hiding controls because state is ", state.getState());
+                        hidePlaybackControls();
+                    }
                 }
-            }
-        };
+
+                @Override
+                public void onMetadataChanged(MediaMetadataCompat metadata) {
+                    super.onMetadataChanged(metadata);
+                    if (shouldShowControls()) {
+                        showPlaybackControls();
+                    } else {
+                        LogHelper.d(TAG, "mediaControllerCallback.onMetadataChanged: " +
+                                "hiding controls because metadata is null");
+                        hidePlaybackControls();
+                    }
+                }
+
+
+            };
 
     private final MediaBrowserCompat.ConnectionCallback mConnectionCallback =
-        new MediaBrowserCompat.ConnectionCallback() {
-            @Override
-            public void onConnected() {
-                LogHelper.d(TAG, "onConnected");
-                try {
+            new MediaBrowserCompat.ConnectionCallback() {
+                @Override
+                public void onConnected() {
+                    LogHelper.d(TAG, "onConnected");
                     connectToSession(mMediaBrowser.getSessionToken());
-                } catch (RemoteException e) {
-                    LogHelper.e(TAG, e, "could not connect media controller");
-                    hidePlaybackControls();
                 }
-            }
-        };
+            };
 
 }

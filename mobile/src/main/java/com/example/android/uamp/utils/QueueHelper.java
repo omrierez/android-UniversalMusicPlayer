@@ -16,6 +16,7 @@
 
 package com.example.android.uamp.utils;
 
+import android.media.session.MediaSession;
 import android.os.Bundle;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaSessionCompat;
@@ -39,7 +40,7 @@ public class QueueHelper {
     private static final int RANDOM_QUEUE_SIZE = 10;
 
     public static List<MediaSessionCompat.QueueItem> getPlayingQueue(String mediaId,
-            MusicProvider musicProvider) {
+                                                                     MusicProvider musicProvider) {
 
         // extract the browsing hierarchy from the media ID:
         String[] hierarchy = MediaIDHelper.getHierarchy(mediaId);
@@ -48,6 +49,7 @@ public class QueueHelper {
             LogHelper.e(TAG, "Could not build a playing queue for this mediaId: ", mediaId);
             return null;
         }
+        
 
         String categoryType = hierarchy[0];
         String categoryValue = hierarchy[1];
@@ -164,7 +166,7 @@ public class QueueHelper {
      * Create a random queue with at most {@link #RANDOM_QUEUE_SIZE} elements.
      *
      * @param musicProvider the provider used for fetching music.
-     * @return list containing {@link MediaSessionCompat.QueueItem}'s
+     * @return list containing {@link MediaSession.QueueItem}'s
      */
     public static List<MediaSessionCompat.QueueItem> getRandomQueue(MusicProvider musicProvider) {
         List<MediaMetadataCompat> result = new ArrayList<>(RANDOM_QUEUE_SIZE);

@@ -21,15 +21,14 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.media.session.PlaybackState;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.os.RemoteException;
 import android.support.annotation.NonNull;
-import android.support.v4.media.MediaBrowserCompat.MediaItem;
+import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.MediaBrowserServiceCompat;
 import android.support.v4.media.MediaMetadataCompat;
-import android.support.v4.media.session.MediaButtonReceiver;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.support.v7.media.MediaRouter;
@@ -253,11 +252,7 @@ public class MusicService extends MediaBrowserServiceCompat implements
 
         mPlaybackManager.updatePlaybackState(null);
 
-        try {
-            mMediaNotificationManager = new MediaNotificationManager(this);
-        } catch (RemoteException e) {
-            throw new IllegalStateException("Could not create a MediaNotificationManager", e);
-        }
+        mMediaNotificationManager = new MediaNotificationManager(this);
         VideoCastManager.getInstance().addVideoCastConsumer(mCastConsumer);
         mMediaRouter = MediaRouter.getInstance(getApplicationContext());
 
@@ -279,9 +274,6 @@ public class MusicService extends MediaBrowserServiceCompat implements
                 } else if (CMD_STOP_CASTING.equals(command)) {
                     VideoCastManager.getInstance().disconnect();
                 }
-            } else {
-                // Try to handle the intent as a media button event wrapped by MediaButtonReceiver
-                MediaButtonReceiver.handleIntent(mSession, startIntent);
             }
         }
         // Reset the delay handler to enqueue a message to stop the service if
@@ -340,11 +332,11 @@ public class MusicService extends MediaBrowserServiceCompat implements
     }
 
     @Override
-    public void onLoadChildren(@NonNull final String parentMediaId,
-                               @NonNull final Result<List<MediaItem>> result) {
+    public void onLoadChildren(@NonNull String parentMediaId, @NonNull Result<List<MediaBrowserCompat.MediaItem>> result) {
         LogHelper.d(TAG, "OnLoadChildren: parentMediaId=", parentMediaId);
         result.sendResult(mMusicProvider.getChildren(parentMediaId, getResources()));
     }
+
 
     /**
      * Callback method called from PlaybackManager whenever the music is about to play.
@@ -377,14 +369,17 @@ public class MusicService extends MediaBrowserServiceCompat implements
     }
 
     @Override
+    public void onPlaybackStateUpdated(PlaybackState newState) {
+        mSession.setPlaybackState(PlaybackStateCompat.fromPlaybackState(newState));
+
+    }
+
+    @Override
     public void onNotificationRequired() {
         mMediaNotificationManager.startNotification();
     }
 
-    @Override
-    public void onPlaybackStateUpdated(PlaybackStateCompat newState) {
-        mSession.setPlaybackState(newState);
-    }
+
 
     private void registerCarConnectionReceiver() {
         IntentFilter filter = new IntentFilter(CarHelper.ACTION_MEDIA_STATUS);

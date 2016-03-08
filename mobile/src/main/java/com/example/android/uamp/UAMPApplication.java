@@ -17,9 +17,11 @@ package com.example.android.uamp;
 
 import android.app.Application;
 
-import com.example.android.uamp.ui.FullScreenPlayerActivity;
 import com.google.android.libraries.cast.companionlibrary.cast.CastConfiguration;
 import com.google.android.libraries.cast.companionlibrary.cast.VideoCastManager;
+
+import java.util.Locale;
+
 
 /**
  * The {@link Application} for the uAmp application.
@@ -30,13 +32,22 @@ public class UAMPApplication extends Application {
     public void onCreate() {
         super.onCreate();
         String applicationId = getResources().getString(R.string.cast_application_id);
-        VideoCastManager.initialize(
-                getApplicationContext(),
-                new CastConfiguration.Builder(applicationId)
-                        .enableWifiReconnection()
-                        .enableAutoReconnect()
-                        .enableDebug()
-                        .setTargetActivity(FullScreenPlayerActivity.class)
-                        .build());
+
+        CastConfiguration options = new CastConfiguration.Builder(applicationId)
+                .enableAutoReconnect()
+                .enableCaptionManagement()
+                .enableDebug()
+                .enableLockScreen()
+                .enableNotification()
+                .enableWifiReconnection()
+                .setCastControllerImmersive(true)
+                .setLaunchOptions(false, Locale.getDefault())
+                .setNextPrevVisibilityPolicy(CastConfiguration.NEXT_PREV_VISIBILITY_POLICY_DISABLED)
+                .addNotificationAction(CastConfiguration.NOTIFICATION_ACTION_REWIND, false)
+                .addNotificationAction(CastConfiguration.NOTIFICATION_ACTION_PLAY_PAUSE, true)
+                .addNotificationAction(CastConfiguration.NOTIFICATION_ACTION_DISCONNECT, true)
+                .setForwardStep(10)
+                .build();
+        VideoCastManager castManager = VideoCastManager.initialize(this,options);
     }
 }

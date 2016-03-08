@@ -15,9 +15,9 @@
  */
 package com.example.android.uamp.playback;
 
-import com.example.android.uamp.MusicService;
+import android.support.v4.media.session.MediaSessionCompat;
 
-import static android.support.v4.media.session.MediaSessionCompat.QueueItem;
+import com.example.android.uamp.MusicService;
 
 /**
  * Interface representing either Local or Remote Playback. The {@link MusicService} works
@@ -81,7 +81,7 @@ public interface Playback {
     /**
      * @param item to play
      */
-    void play(QueueItem item);
+    void play(MediaSessionCompat.QueueItem item);
 
     /**
      * Pause the current playing item

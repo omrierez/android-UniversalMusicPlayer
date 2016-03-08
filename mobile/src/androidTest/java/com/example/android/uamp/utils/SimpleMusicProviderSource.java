@@ -32,10 +32,9 @@ public class SimpleMusicProviderSource implements MusicProviderSource {
                     String iconUrl, long trackNumber, long totalTrackCount, long durationMs) {
         String id = String.valueOf(source.hashCode());
 
-        //noinspection ResourceType
         mData.add(new MediaMetadataCompat.Builder()
                 .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID, id)
-                .putString(MusicProviderSource.CUSTOM_METADATA_TRACK_SOURCE, source)
+                .putString(MediaMetadataCompat.METADATA_KEY_AUTHOR, source)
                 .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, album)
                 .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, artist)
                 .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, durationMs)

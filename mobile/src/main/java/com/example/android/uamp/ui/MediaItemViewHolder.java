@@ -18,10 +18,8 @@ package com.example.android.uamp.ui;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.content.res.Resources;
 import android.graphics.drawable.AnimationDrawable;
-import android.graphics.drawable.Drawable;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.media.MediaDescriptionCompat;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -47,7 +45,7 @@ public class MediaItemViewHolder {
     TextView mDescriptionView;
 
     static View setupView(Activity activity, View convertView, ViewGroup parent,
-                                    MediaDescriptionCompat description, int state) {
+                          MediaDescriptionCompat description, int state) {
 
         if (sColorStateNotPlaying == null || sColorStatePlaying == null) {
             initializeColorStateLists(activity);
@@ -73,30 +71,29 @@ public class MediaItemViewHolder {
         holder.mTitleView.setText(description.getTitle());
         holder.mDescriptionView.setText(description.getSubtitle());
 
+        Resources resources=activity.getResources();
         // If the state of convertView is different, we need to adapt the view to the
         // new state.
         if (cachedState == null || cachedState != state) {
             switch (state) {
                 case STATE_PLAYABLE:
-                    Drawable pauseDrawable = ContextCompat.getDrawable(activity,
-                            R.drawable.ic_play_arrow_black_36dp);
-                    DrawableCompat.setTintList(pauseDrawable, sColorStateNotPlaying);
-                    holder.mImageView.setImageDrawable(pauseDrawable);
+                    holder.mImageView.setImageDrawable(
+                            resources.getDrawable(R.drawable.ic_play_arrow_black_36dp));
+                    //holder.mImageView.setImageTintList(sColorStateNotPlaying);
                     holder.mImageView.setVisibility(View.VISIBLE);
                     break;
                 case STATE_PLAYING:
                     AnimationDrawable animation = (AnimationDrawable)
-                            ContextCompat.getDrawable(activity, R.drawable.ic_equalizer_white_36dp);
-                    DrawableCompat.setTintList(animation, sColorStatePlaying);
+                            resources.getDrawable(R.drawable.ic_equalizer_white_36dp);
                     holder.mImageView.setImageDrawable(animation);
+                 //   holder.mImageView.setImageTintList(sColorStatePlaying);
                     holder.mImageView.setVisibility(View.VISIBLE);
-                    animation.start();
+                    if (animation != null) animation.start();
                     break;
                 case STATE_PAUSED:
-                    Drawable playDrawable = ContextCompat.getDrawable(activity,
-                            R.drawable.ic_equalizer1_white_36dp);
-                    DrawableCompat.setTintList(playDrawable, sColorStatePlaying);
-                    holder.mImageView.setImageDrawable(playDrawable);
+                    holder.mImageView.setImageDrawable(
+                            resources.getDrawable(R.drawable.ic_equalizer1_white_36dp));
+                   // holder.mImageView.setImageTintList(sColorStateNotPlaying);
                     holder.mImageView.setVisibility(View.VISIBLE);
                     break;
                 default:

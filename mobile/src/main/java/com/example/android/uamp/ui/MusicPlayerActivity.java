@@ -45,7 +45,7 @@ public class MusicPlayerActivity extends BaseActivity
     /**
      * Optionally used with {@link #EXTRA_START_FULLSCREEN} to carry a MediaDescription to
      * the {@link FullScreenPlayerActivity}, speeding up the screen rendering
-     * while the {@link android.support.v4.media.session.MediaControllerCompat} is connecting.
+     * while the {@link android.media.session.MediaController} is connecting.
      */
     public static final String EXTRA_CURRENT_MEDIA_DESCRIPTION =
         "com.example.android.uamp.CURRENT_MEDIA_DESCRIPTION";
@@ -81,8 +81,7 @@ public class MusicPlayerActivity extends BaseActivity
     public void onMediaItemSelected(MediaBrowserCompat.MediaItem item) {
         LogHelper.d(TAG, "onMediaItemSelected, mediaId=" + item.getMediaId());
         if (item.isPlayable()) {
-            getSupportMediaController().getTransportControls()
-                    .playFromMediaId(item.getMediaId(), null);
+            getSupportMediaController().getTransportControls().playFromMediaId(item.getMediaId(), null);
         } else if (item.isBrowsable()) {
             navigateToBrowser(item.getMediaId());
         } else {
@@ -177,8 +176,8 @@ public class MusicPlayerActivity extends BaseActivity
             // send it to the media session and set it to null, so it won't play again
             // when the activity is stopped/started or recreated:
             String query = mVoiceSearchParams.getString(SearchManager.QUERY);
-            getSupportMediaController().getTransportControls()
-                    .playFromSearch(query, mVoiceSearchParams);
+
+            getSupportMediaController().getTransportControls().playFromSearch(query, mVoiceSearchParams);
             mVoiceSearchParams = null;
         }
         getBrowseFragment().onConnected();

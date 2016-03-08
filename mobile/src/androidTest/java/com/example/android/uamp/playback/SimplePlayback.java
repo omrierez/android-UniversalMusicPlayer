@@ -15,7 +15,7 @@
 */
 package com.example.android.uamp.playback;
 
-import android.support.v4.media.session.MediaSessionCompat;
+import android.media.session.MediaSession;
 
 class SimplePlayback implements Playback {
     @Override
@@ -64,7 +64,7 @@ class SimplePlayback implements Playback {
     }
 
     @Override
-    public void play(MediaSessionCompat.QueueItem item) {
+    public void play(MediaSession.QueueItem item) {
 
     }
 

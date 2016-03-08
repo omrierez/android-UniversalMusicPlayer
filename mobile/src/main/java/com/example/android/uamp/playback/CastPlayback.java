@@ -15,13 +15,13 @@
  */
 package com.example.android.uamp.playback;
 
+import android.media.session.PlaybackState;
 import android.net.Uri;
 import android.support.v4.media.MediaMetadataCompat;
-import android.support.v4.media.session.PlaybackStateCompat;
+import android.support.v4.media.session.MediaSessionCompat;
 import android.text.TextUtils;
 
 import com.example.android.uamp.model.MusicProvider;
-import com.example.android.uamp.model.MusicProviderSource;
 import com.example.android.uamp.utils.LogHelper;
 import com.example.android.uamp.utils.MediaIDHelper;
 import com.google.android.gms.cast.MediaInfo;
@@ -37,7 +37,6 @@ import com.google.android.libraries.cast.companionlibrary.cast.exceptions.Transi
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import static android.support.v4.media.session.MediaSessionCompat.QueueItem;
 
 /**
  * An implementation of Playback that talks to Cast.
@@ -84,7 +83,7 @@ public class CastPlayback implements Playback {
     @Override
     public void stop(boolean notifyListeners) {
         VideoCastManager.getInstance().removeVideoCastConsumer(mCastConsumer);
-        mState = PlaybackStateCompat.STATE_STOPPED;
+        mState = PlaybackState.STATE_STOPPED;
         if (notifyListeners && mCallback != null) {
             mCallback.onPlaybackStatusChanged(mState);
         }
@@ -119,10 +118,10 @@ public class CastPlayback implements Playback {
     }
 
     @Override
-    public void play(QueueItem item) {
+    public void play(MediaSessionCompat.QueueItem item) {
         try {
             loadMedia(item.getDescription().getMediaId(), true);
-            mState = PlaybackStateCompat.STATE_BUFFERING;
+            mState = PlaybackState.STATE_BUFFERING;
             if (mCallback != null) {
                 mCallback.onPlaybackStatusChanged(mState);
             }
@@ -263,8 +262,7 @@ public class CastPlayback implements Playback {
         // when the cast dialog is clicked.
         mediaMetadata.addImage(image);
 
-        //noinspection ResourceType
-        return new MediaInfo.Builder(track.getString(MusicProviderSource.CUSTOM_METADATA_TRACK_SOURCE))
+        return new MediaInfo.Builder(track.getString(MediaMetadataCompat.METADATA_KEY_AUTHOR))
                 .setContentType(MIME_TYPE_AUDIO_MPEG)
                 .setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
                 .setMetadata(mediaMetadata)
@@ -316,20 +314,20 @@ public class CastPlayback implements Playback {
                 }
                 break;
             case MediaStatus.PLAYER_STATE_BUFFERING:
-                mState = PlaybackStateCompat.STATE_BUFFERING;
+                mState = PlaybackState.STATE_BUFFERING;
                 if (mCallback != null) {
                     mCallback.onPlaybackStatusChanged(mState);
                 }
                 break;
             case MediaStatus.PLAYER_STATE_PLAYING:
-                mState = PlaybackStateCompat.STATE_PLAYING;
+                mState = PlaybackState.STATE_PLAYING;
                 setMetadataFromRemote();
                 if (mCallback != null) {
                     mCallback.onPlaybackStatusChanged(mState);
                 }
                 break;
             case MediaStatus.PLAYER_STATE_PAUSED:
-                mState = PlaybackStateCompat.STATE_PAUSED;
+                mState = PlaybackState.STATE_PAUSED;
                 setMetadataFromRemote();
                 if (mCallback != null) {
                     mCallback.onPlaybackStatusChanged(mState);

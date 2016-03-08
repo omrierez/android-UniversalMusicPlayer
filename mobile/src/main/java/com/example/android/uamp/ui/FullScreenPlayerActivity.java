@@ -19,18 +19,16 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.media.MediaDescription;
+import android.media.MediaMetadata;
+import android.media.browse.MediaBrowser;
+import android.media.session.MediaController;
+import android.media.session.MediaSession;
+import android.media.session.PlaybackState;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.RemoteException;
 import android.os.SystemClock;
 import android.support.annotation.NonNull;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.media.MediaBrowserCompat;
-import android.support.v4.media.MediaDescriptionCompat;
-import android.support.v4.media.MediaMetadataCompat;
-import android.support.v4.media.session.MediaControllerCompat;
-import android.support.v4.media.session.MediaSessionCompat;
-import android.support.v4.media.session.PlaybackStateCompat;
 import android.text.format.DateUtils;
 import android.view.View;
 import android.widget.ImageView;
@@ -77,7 +75,7 @@ public class FullScreenPlayerActivity extends ActionBarCastActivity {
 
     private String mCurrentArtUrl;
     private final Handler mHandler = new Handler();
-    private MediaBrowserCompat mMediaBrowser;
+    private MediaBrowser mMediaBrowser;
 
     private final Runnable mUpdateProgressTask = new Runnable() {
         @Override
@@ -90,17 +88,17 @@ public class FullScreenPlayerActivity extends ActionBarCastActivity {
         Executors.newSingleThreadScheduledExecutor();
 
     private ScheduledFuture<?> mScheduleFuture;
-    private PlaybackStateCompat mLastPlaybackState;
+    private PlaybackState mLastPlaybackState;
 
-    private final MediaControllerCompat.Callback mCallback = new MediaControllerCompat.Callback() {
+    private final MediaController.Callback mCallback = new MediaController.Callback() {
         @Override
-        public void onPlaybackStateChanged(@NonNull PlaybackStateCompat state) {
+        public void onPlaybackStateChanged(@NonNull PlaybackState state) {
             LogHelper.d(TAG, "onPlaybackstate changed", state);
             updatePlaybackState(state);
         }
 
         @Override
-        public void onMetadataChanged(MediaMetadataCompat metadata) {
+        public void onMetadataChanged(MediaMetadata metadata) {
             if (metadata != null) {
                 updateMediaDescription(metadata.getDescription());
                 updateDuration(metadata);
@@ -108,16 +106,12 @@ public class FullScreenPlayerActivity extends ActionBarCastActivity {
         }
     };
 
-    private final MediaBrowserCompat.ConnectionCallback mConnectionCallback =
-            new MediaBrowserCompat.ConnectionCallback() {
+    private final MediaBrowser.ConnectionCallback mConnectionCallback =
+            new MediaBrowser.ConnectionCallback() {
         @Override
         public void onConnected() {
             LogHelper.d(TAG, "onConnected");
-            try {
-                connectToSession(mMediaBrowser.getSessionToken());
-            } catch (RemoteException e) {
-                LogHelper.e(TAG, e, "could not connect media controller");
-            }
+            connectToSession(mMediaBrowser.getSessionToken());
         }
     };
 
@@ -132,8 +126,8 @@ public class FullScreenPlayerActivity extends ActionBarCastActivity {
         }
 
         mBackgroundImage = (ImageView) findViewById(R.id.background_image);
-        mPauseDrawable = ContextCompat.getDrawable(this, R.drawable.uamp_ic_pause_white_48dp);
-        mPlayDrawable = ContextCompat.getDrawable(this, R.drawable.uamp_ic_play_arrow_white_48dp);
+        mPauseDrawable = getDrawable(R.drawable.uamp_ic_pause_white_48dp);
+        mPlayDrawable = getDrawable(R.drawable.uamp_ic_play_arrow_white_48dp);
         mPlayPause = (ImageView) findViewById(R.id.play_pause);
         mSkipNext = (ImageView) findViewById(R.id.next);
         mSkipPrev = (ImageView) findViewById(R.id.prev);
@@ -149,8 +143,8 @@ public class FullScreenPlayerActivity extends ActionBarCastActivity {
         mSkipNext.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                MediaControllerCompat.TransportControls controls =
-                    getSupportMediaController().getTransportControls();
+                MediaController.TransportControls controls =
+                    getMediaController().getTransportControls();
                 controls.skipToNext();
             }
         });
@@ -158,8 +152,8 @@ public class FullScreenPlayerActivity extends ActionBarCastActivity {
         mSkipPrev.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                MediaControllerCompat.TransportControls controls =
-                    getSupportMediaController().getTransportControls();
+                MediaController.TransportControls controls =
+                    getMediaController().getTransportControls();
                 controls.skipToPrevious();
             }
         });
@@ -167,18 +161,18 @@ public class FullScreenPlayerActivity extends ActionBarCastActivity {
         mPlayPause.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                PlaybackStateCompat state = getSupportMediaController().getPlaybackState();
+                PlaybackState state = getMediaController().getPlaybackState();
                 if (state != null) {
-                    MediaControllerCompat.TransportControls controls =
-                            getSupportMediaController().getTransportControls();
+                    MediaController.TransportControls controls =
+                            getMediaController().getTransportControls();
                     switch (state.getState()) {
-                        case PlaybackStateCompat.STATE_PLAYING: // fall through
-                        case PlaybackStateCompat.STATE_BUFFERING:
+                        case PlaybackState.STATE_PLAYING: // fall through
+                        case PlaybackState.STATE_BUFFERING:
                             controls.pause();
                             stopSeekbarUpdate();
                             break;
-                        case PlaybackStateCompat.STATE_PAUSED:
-                        case PlaybackStateCompat.STATE_STOPPED:
+                        case PlaybackState.STATE_PAUSED:
+                        case PlaybackState.STATE_STOPPED:
                             controls.play();
                             scheduleSeekbarUpdate();
                             break;
@@ -202,7 +196,7 @@ public class FullScreenPlayerActivity extends ActionBarCastActivity {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                getSupportMediaController().getTransportControls().seekTo(seekBar.getProgress());
+                getMediaController().getTransportControls().seekTo(seekBar.getProgress());
                 scheduleSeekbarUpdate();
             }
         });
@@ -212,36 +206,35 @@ public class FullScreenPlayerActivity extends ActionBarCastActivity {
             updateFromParams(getIntent());
         }
 
-        mMediaBrowser = new MediaBrowserCompat(this,
+        mMediaBrowser = new MediaBrowser(this,
             new ComponentName(this, MusicService.class), mConnectionCallback, null);
     }
 
-    private void connectToSession(MediaSessionCompat.Token token) throws RemoteException {
-        MediaControllerCompat mediaController = new MediaControllerCompat(
-                FullScreenPlayerActivity.this, token);
+    private void connectToSession(MediaSession.Token token) {
+        MediaController mediaController = new MediaController(FullScreenPlayerActivity.this, token);
         if (mediaController.getMetadata() == null) {
             finish();
             return;
         }
-        setSupportMediaController(mediaController);
+        setMediaController(mediaController);
         mediaController.registerCallback(mCallback);
-        PlaybackStateCompat state = mediaController.getPlaybackState();
+        PlaybackState state = mediaController.getPlaybackState();
         updatePlaybackState(state);
-        MediaMetadataCompat metadata = mediaController.getMetadata();
+        MediaMetadata metadata = mediaController.getMetadata();
         if (metadata != null) {
             updateMediaDescription(metadata.getDescription());
             updateDuration(metadata);
         }
         updateProgress();
-        if (state != null && (state.getState() == PlaybackStateCompat.STATE_PLAYING ||
-                state.getState() == PlaybackStateCompat.STATE_BUFFERING)) {
+        if (state != null && (state.getState() == PlaybackState.STATE_PLAYING ||
+                state.getState() == PlaybackState.STATE_BUFFERING)) {
             scheduleSeekbarUpdate();
         }
     }
 
     private void updateFromParams(Intent intent) {
         if (intent != null) {
-            MediaDescriptionCompat description = intent.getParcelableExtra(
+            MediaDescription description = intent.getParcelableExtra(
                 MusicPlayerActivity.EXTRA_CURRENT_MEDIA_DESCRIPTION);
             if (description != null) {
                 updateMediaDescription(description);
@@ -283,8 +276,8 @@ public class FullScreenPlayerActivity extends ActionBarCastActivity {
         if (mMediaBrowser != null) {
             mMediaBrowser.disconnect();
         }
-        if (getSupportMediaController() != null) {
-            getSupportMediaController().unregisterCallback(mCallback);
+        if (getMediaController() != null) {
+            getMediaController().unregisterCallback(mCallback);
         }
     }
 
@@ -295,7 +288,7 @@ public class FullScreenPlayerActivity extends ActionBarCastActivity {
         mExecutorService.shutdown();
     }
 
-    private void fetchImageAsync(@NonNull MediaDescriptionCompat description) {
+    private void fetchImageAsync(@NonNull MediaDescription description) {
         if (description.getIconUri() == null) {
             return;
         }
@@ -324,7 +317,7 @@ public class FullScreenPlayerActivity extends ActionBarCastActivity {
         }
     }
 
-    private void updateMediaDescription(MediaDescriptionCompat description) {
+    private void updateMediaDescription(MediaDescription description) {
         if (description == null) {
             return;
         }
@@ -334,23 +327,23 @@ public class FullScreenPlayerActivity extends ActionBarCastActivity {
         fetchImageAsync(description);
     }
 
-    private void updateDuration(MediaMetadataCompat metadata) {
+    private void updateDuration(MediaMetadata metadata) {
         if (metadata == null) {
             return;
         }
         LogHelper.d(TAG, "updateDuration called ");
-        int duration = (int) metadata.getLong(MediaMetadataCompat.METADATA_KEY_DURATION);
+        int duration = (int) metadata.getLong(MediaMetadata.METADATA_KEY_DURATION);
         mSeekbar.setMax(duration);
         mEnd.setText(DateUtils.formatElapsedTime(duration/1000));
     }
 
-    private void updatePlaybackState(PlaybackStateCompat state) {
+    private void updatePlaybackState(PlaybackState state) {
         if (state == null) {
             return;
         }
         mLastPlaybackState = state;
-        if (getSupportMediaController() != null && getSupportMediaController().getExtras() != null) {
-            String castName = getSupportMediaController()
+        if (getMediaController() != null && getMediaController().getExtras() != null) {
+            String castName = getMediaController()
                     .getExtras().getString(MusicService.EXTRA_CONNECTED_CAST);
             String line3Text = castName == null ? "" : getResources()
                         .getString(R.string.casting_to_device, castName);
@@ -358,28 +351,28 @@ public class FullScreenPlayerActivity extends ActionBarCastActivity {
         }
 
         switch (state.getState()) {
-            case PlaybackStateCompat.STATE_PLAYING:
+            case PlaybackState.STATE_PLAYING:
                 mLoading.setVisibility(INVISIBLE);
                 mPlayPause.setVisibility(VISIBLE);
                 mPlayPause.setImageDrawable(mPauseDrawable);
                 mControllers.setVisibility(VISIBLE);
                 scheduleSeekbarUpdate();
                 break;
-            case PlaybackStateCompat.STATE_PAUSED:
+            case PlaybackState.STATE_PAUSED:
                 mControllers.setVisibility(VISIBLE);
                 mLoading.setVisibility(INVISIBLE);
                 mPlayPause.setVisibility(VISIBLE);
                 mPlayPause.setImageDrawable(mPlayDrawable);
                 stopSeekbarUpdate();
                 break;
-            case PlaybackStateCompat.STATE_NONE:
-            case PlaybackStateCompat.STATE_STOPPED:
+            case PlaybackState.STATE_NONE:
+            case PlaybackState.STATE_STOPPED:
                 mLoading.setVisibility(INVISIBLE);
                 mPlayPause.setVisibility(VISIBLE);
                 mPlayPause.setImageDrawable(mPlayDrawable);
                 stopSeekbarUpdate();
                 break;
-            case PlaybackStateCompat.STATE_BUFFERING:
+            case PlaybackState.STATE_BUFFERING:
                 mPlayPause.setVisibility(INVISIBLE);
                 mLoading.setVisibility(VISIBLE);
                 mLine3.setText(R.string.loading);
@@ -389,9 +382,9 @@ public class FullScreenPlayerActivity extends ActionBarCastActivity {
                 LogHelper.d(TAG, "Unhandled state ", state.getState());
         }
 
-        mSkipNext.setVisibility((state.getActions() & PlaybackStateCompat.ACTION_SKIP_TO_NEXT) == 0
+        mSkipNext.setVisibility((state.getActions() & PlaybackState.ACTION_SKIP_TO_NEXT) == 0
             ? INVISIBLE : VISIBLE );
-        mSkipPrev.setVisibility((state.getActions() & PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS) == 0
+        mSkipPrev.setVisibility((state.getActions() & PlaybackState.ACTION_SKIP_TO_PREVIOUS) == 0
             ? INVISIBLE : VISIBLE );
     }
 
@@ -400,11 +393,11 @@ public class FullScreenPlayerActivity extends ActionBarCastActivity {
             return;
         }
         long currentPosition = mLastPlaybackState.getPosition();
-        if (mLastPlaybackState.getState() != PlaybackStateCompat.STATE_PAUSED) {
+        if (mLastPlaybackState.getState() != PlaybackState.STATE_PAUSED) {
             // Calculate the elapsed time between the last position update and now and unless
             // paused, we can assume (delta * speed) + current position is approximately the
             // latest position. This ensure that we do not repeatedly call the getPlaybackState()
-            // on MediaControllerCompat.
+            // on MediaController.
             long timeDelta = SystemClock.elapsedRealtime() -
                     mLastPlaybackState.getLastPositionUpdateTime();
             currentPosition += (int) timeDelta * mLastPlaybackState.getPlaybackSpeed();

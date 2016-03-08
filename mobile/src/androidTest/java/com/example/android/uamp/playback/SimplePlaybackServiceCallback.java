@@ -15,7 +15,7 @@
 */
 package com.example.android.uamp.playback;
 
-import android.support.v4.media.session.PlaybackStateCompat;
+import android.media.session.PlaybackState;
 
 class SimplePlaybackServiceCallback implements PlaybackManager.PlaybackServiceCallback {
     @Override
@@ -34,7 +34,7 @@ class SimplePlaybackServiceCallback implements PlaybackManager.PlaybackServiceCa
     }
 
     @Override
-    public void onPlaybackStateUpdated(PlaybackStateCompat newState) {
+    public void onPlaybackStateUpdated(PlaybackState newState) {
 
     }
 }
